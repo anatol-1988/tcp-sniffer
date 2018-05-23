@@ -1,0 +1,24 @@
+BasedOnStyle:  WebKit
+AlignAfterOpenBracket: true
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+ColumnLimit:     80
+Cpp11BracedListStyle: true
+NamespaceIndentation: None
+PenaltyReturnTypeOnItsOwnLine: 0
+Standard: Cpp11
+AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: None
