@@ -22,3 +22,5 @@ PenaltyReturnTypeOnItsOwnLine: 0
 Standard: Cpp11
 AlwaysBreakAfterReturnType: None
 AlwaysBreakAfterDefinitionReturnType: None
+PointerAlignment: Right
+
