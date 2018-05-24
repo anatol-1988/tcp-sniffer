@@ -27,7 +27,7 @@ enum class PacketType {
     other
 };
 
-auto getPacketType(unsigned char const *buffer) -> PacketType
+auto getPacketType(uint8_t const *buffer) -> PacketType
 {
     auto const *iph = reinterpret_cast<const iphdr *>(buffer);
     auto type = PacketType{};
@@ -61,11 +61,30 @@ auto operator<<(ostream &out, PacketType type) -> ostream &
     return out;
 }
 
-constexpr auto protocol(uint8_t code) -> char const *
+class Dump
 {
-    switch (code) {
+public:
+    Dump(uint8_t const *begin, uint8_t const *end)
+        : _begin{begin}
+        , _end{end}
+    {
     }
-}
+
+    friend auto operator<<(ostream &out, Dump const &dump) -> ostream &
+    {
+        out << hex;
+
+        for (uint8_t const *ptr = dump._begin; ptr < dump._end; ++ptr)
+            cout << static_cast<int>(*ptr);
+
+        out << dec;
+        return out;
+    }
+
+private:
+    uint8_t const *_begin;
+    uint8_t const *_end;
+};
 
 auto operator<<(ostream &out, iphdr const &hdr) -> ostream &
 {
@@ -84,8 +103,7 @@ auto operator<<(ostream &out, iphdr const &hdr) -> ostream &
         << " - Protocol: " << static_cast<PacketType>(hdr.protocol) << "\n"
         << " - Checksum: 0x" << hex << ntohs(hdr.check) << dec << "\n"
         << " - Source IP: " << inet_ntoa(source.sin_addr) << "\n"
-        << " - Destination IP: " << inet_ntoa(dest.sin_addr) << "\n"
-        << "----------------------------------------------";
+        << " - Destination IP: " << inet_ntoa(dest.sin_addr);
 
     return out;
 }
@@ -106,8 +124,7 @@ auto operator<<(ostream &out, tcphdr const &hdr) -> ostream &
         << " - Finish Flag: " << static_cast<bool>(hdr.fin) << "\n"
         << " - Window: " << ntohs(hdr.window) << "\n"
         << " - Checksum: 0x" << hex << ntohs(hdr.check) << dec << "\n"
-        << " - Urgent Pointer: " << hdr.urg_ptr << "\n"
-        << "----------------------------------------------";
+        << " - Urgent Pointer: " << hdr.urg_ptr;
     return out;
 }
 
@@ -116,20 +133,27 @@ class TcpPacket
 private:
     iphdr const *_iph = nullptr;
     tcphdr const *_tcph = nullptr;
+    uint8_t const *_endBuffer = nullptr;
 
 public:
-    TcpPacket(unsigned char const *buffer, ssize_t size)
+    TcpPacket(uint8_t const *buffer, ssize_t size)
         : _iph{reinterpret_cast<iphdr const *>(buffer)}
         , _tcph{reinterpret_cast<tcphdr const *>(
               buffer + (_iph->ihl * sizeof(uint32_t)))}
+        , _endBuffer{buffer + size}
     {
     }
 
-    friend ostream &operator<<(ostream &out, TcpPacket const &packet)
+    friend auto operator<<(ostream &out, TcpPacket const &packet) -> ostream &
     {
         out << "================= TCP Packet =================\n"
             << *packet._iph << "\n"
             << *packet._tcph << "\n"
+            << "----------------------------------------------\n"
+            << Dump{reinterpret_cast<uint8_t const *>(packet._tcph)
+                        + packet._tcph->doff * sizeof(uint32_t),
+                    packet._endBuffer}
+            << "\n"
             << "==============================================";
         return out;
     }
@@ -138,7 +162,7 @@ public:
 auto main() -> int
 {
     // ToDo use shared_ptr to share buffer between TcpPacket and buffer
-    auto buffer = array<unsigned char, bufferSize>{};
+    auto buffer = array<uint8_t, bufferSize>{};
 
     cout << "Starting sniffer\n";
     auto sockRaw = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
