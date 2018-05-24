@@ -8,8 +8,11 @@
 #include <sys/socket.h>
 
 using std::array;
+using std::boolalpha;
 using std::cin;
 using std::cout;
+using std::dec;
+using std::hex;
 using std::ostream;
 
 auto constexpr bufferSize = 0x10000;
@@ -71,7 +74,7 @@ auto operator<<(ostream &out, iphdr const &hdr) -> ostream &
     auto dest = sockaddr_in{};
     dest.sin_addr.s_addr = hdr.daddr;
 
-    out << "----------------- IP header ------------------\n"
+    out << "----------------- IP Header ------------------\n"
         << " - IP version: " << hdr.version << "\n"
         << " - IP Header Length: " << hdr.ihl * sizeof(uint32_t) << " bytes\n"
         << " - Type of Service: " << hdr.tos << "\n"
@@ -79,11 +82,32 @@ auto operator<<(ostream &out, iphdr const &hdr) -> ostream &
         << " - Identification: " << ntohs(hdr.id) << "\n"
         << " - TTL: " << static_cast<int>(hdr.ttl) << "\n"
         << " - Protocol: " << static_cast<PacketType>(hdr.protocol) << "\n"
-        << " - Checksum: " << ntohs(hdr.check) << "\n"
+        << " - Checksum: 0x" << hex << ntohs(hdr.check) << dec << "\n"
         << " - Source IP: " << inet_ntoa(source.sin_addr) << "\n"
         << " - Destination IP: " << inet_ntoa(dest.sin_addr) << "\n"
-        << "----------------------------------------------\n";
+        << "----------------------------------------------";
 
+    return out;
+}
+
+auto operator<<(ostream &out, tcphdr const &hdr) -> ostream &
+{
+    out << "----------------- TCP Header -----------------\n"
+        << " - Source Port: " << ntohs(hdr.source) << "\n"
+        << " - Destination Port: " << ntohs(hdr.dest) << "\n"
+        << " - Sequence Number: " << ntohl(hdr.seq) << "\n"
+        << " - Acknowledge Number: " << ntohl(hdr.ack) << "\n"
+        << " - Header Length: " << hdr.doff * sizeof(uint32_t) << "\n"
+        << " - Urgent Flag: " << boolalpha << static_cast<bool>(hdr.urg) << "\n"
+        << " - Acknowledgement Flag: " << static_cast<bool>(hdr.ack) << "\n"
+        << " - Push Flag: " << static_cast<bool>(hdr.psh) << "\n"
+        << " - Reset Flag: " << static_cast<bool>(hdr.rst) << "\n"
+        << " - Synchronize Flag: " << static_cast<bool>(hdr.syn) << "\n"
+        << " - Finish Flag: " << static_cast<bool>(hdr.fin) << "\n"
+        << " - Window: " << ntohs(hdr.window) << "\n"
+        << " - Checksum: 0x" << hex << ntohs(hdr.check) << dec << "\n"
+        << " - Urgent Pointer: " << hdr.urg_ptr << "\n"
+        << "----------------------------------------------";
     return out;
 }
 
@@ -104,7 +128,9 @@ public:
     friend ostream &operator<<(ostream &out, TcpPacket const &packet)
     {
         out << "================= TCP Packet =================\n"
-            << *packet._iph << "\n";
+            << *packet._iph << "\n"
+            << *packet._tcph << "\n"
+            << "==============================================";
         return out;
     }
 };
