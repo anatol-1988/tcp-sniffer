@@ -1,4 +1,12 @@
 # Starter pipeline
+- task: Nexploit Scan@0
+  inputs:
+    api_token: 'yufn0f6.atikr9dirf5ww8nrmakuj069zopv0b1i'
+    hostname: 'nexploit.app'
+    file_id: '6xkFraa5ecfmHhxTEnabZg'
+    module: 'core'
+    type: 'appscan'
+    protocol: 'http'
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
