@@ -3,7 +3,7 @@ steps:
 - task: Nexploit Scan@0
   inputs:
     api_token: 'yufn0f6.atikr9dirf5ww8nrmakuj069zopv0b1i'
-    hostname: 'nexploit.app'
+    hostname: 'charlie.playground.nexploit.app'
     file_id: '6xkFraa5ecfmHhxTEnabZg'
     module: 'core'
     type: 'appscan'
